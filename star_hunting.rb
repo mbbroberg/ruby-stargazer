@@ -2,11 +2,11 @@ require 'github_api'
 load "pw.config"
 
 github = Github.new login:'mjbrender', password: PW
-list = github.repos.list org: 'basho-labs'
+list = github.repos.list public: true, org: 'basho-labs', auto_pagination: true
 
-#.list user: 'basho-labs'
-
-puts list
+list.each do |repo|
+    puts repo.name
+end
 
 
 # for all repos 
