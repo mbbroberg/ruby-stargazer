@@ -6,19 +6,34 @@ github = Github.new login:'mjbrender', password: PW
 
 # get all repositories visible under basho-labs
 # note that it includes public and private
-list = github.repos.list org: 'basho-labs', auto_pagination: true
+labs_repos =  github.repos.list org: 'basho-labs', auto_pagination: true
+basho_repos = github.repos.list org: 'basho', auto_pagination: true
 
 # hash that will contain all unique users 
 all_users = {}
 
 # for all repos 
 # if key doesn't exist
-# put username as value 
+# put username as key 
 # print size of table 
 
-list.each do |repo|
+labs_repos.each do |repo|
     # Make the call to get all users from the repo
     all_stars = github.activity.starring.list user: 'basho-labs', repo: repo.name, auto_pagination: true
+
+    all_stars.each do |user|
+        key = user.login
+        if all_users.value?(key) == false
+            all_users[key] = 1
+            #exit()
+        end
+    end
+end
+
+
+basho_repos.each do |repo|
+    # Make the call to get all users from the repo
+    all_stars = github.activity.starring.list user: 'basho', repo: repo.name, auto_pagination: true
 
     all_stars.each do |user|
         key = user.login
