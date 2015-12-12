@@ -1,40 +1,10 @@
 require 'github_api'
-load "pw.config"
-
-# Authentication
-org = 'intelsdi-x'
-github = Github.new login:'mjbrender', password: PW
 
 begin
-  # get all repositories visible under intelsdi-x
-  # note that it includes public and private
-  intelsdi_repos = github.repos.list org: org, auto_pagination: true
-
-  # hash that will contain all unique users
-  all_users = {}
-
-  # for all repos
-  # if key doesn't exist
-  # put username as key
-  # print size of table
-
-  intelsdi.each do |repo|
-      # Make the call to get all users from the repo
-      puts "Looking up all repositories under " + org + ". This can take a little while..."
-      all_stars = github.activity.starring.list user: org, repo: repo.name, auto_pagination: true
-
-      all_stars.each do |user|
-          key = user.login
-          if all_users.value?(key) == false
-              all_users[key] = 1
-              #exit()
-          end
-          puts all_users.length
-      end
+  collaborators = github_authed.repos.collaborators.all user:'intelsdi-x', repo:'snap'
+  collaborators.each do |user|
+    puts user.login
   end
-
-  puts all_users.length()
-
 
 rescue Github::Error::GithubError => e
   puts e.message
