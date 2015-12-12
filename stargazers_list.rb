@@ -7,7 +7,9 @@ load "pw.config"
 # It will print progress to STDERR on screen
 
 orgs = {}
-# Octokit.auto_paginate = true
+star_sum = 0
+
+Octokit.auto_paginate = true ## Need this to get over 30 responses
 client = Octokit::Client.new(:login=>"mjbrender", :password=>PW)
 
 sg = client.stargazers("intelsdi-x/snap")
@@ -36,3 +38,5 @@ end
 orgs.each do |k,v|
 	puts k + "," + v.to_s
 end
+
+puts "Total stars:, " + star_sum.to_s
