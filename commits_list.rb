@@ -6,48 +6,92 @@ load "pw.config"
 # You can pipe output to a CSV with "ruby stars.rb > out.csv"
 # It will print progress to STDERR on screen
 
+# committers is a nested hash
+committers = Hash.new do |hsh, key|
+	hsh[key] = {
+		id: key,
+		org: "",
+		tally: 0
+	}
+end
+
 commit_tally = {}
 commit_tally_sum = 0
 
-committer_orgs = {}
-
 Octokit.auto_paginate = true ## Need this to get over 30 responses
-client = Octokit::Client.new(:login=>"mjbrender", :password=>PW)
+client = Octokit::Client.new \
+	:login		=> "mjbrender",
+	:password	=> PW
+
 commits = client.commits("intelsdi-x/snap")
 
 commits.each do | c |
 	if c then
-		## store the committer's organization
-		author = c.author.login.strip
-		author_auth = Octokit.user author
-		author_org = author_auth[:company]
-		committer_orgs[author] = author
+		x = defined? c[:committer][:login]
+		y = defined? c[:committer][:email]
+		if x != nil
+			author = c[:committer][:login]
+			author.strip!
+			company = client.user(author).company
+		elsif y != nil
+			author = c[:committer][:email]
+			author.strip!
+			company = client.user(author).company
+		else
+			puts "Something went wrong"
+			puts c.inspect
+			author = "Error"
+			company = "Error"
+		end
+
+		## prevent trying to strip from an empty string
+		if company != nil
+			author_org = company.strip
+		else
+			author_org = "Errors"
+		end
+
+		## org normalizing can happen here
+		case author_org
+		when "Intel Corporation"
+			author_org = "Intel"
+		end
+		## end normalizing
+
+		committers[author][:org] = author_org
 
 	  ## tally total commits per user
-		commit_tally[author] ||= 0
-		commit_tally[author] += 1
+		committers[author][:tally] ||= 0
+		committers[author][:tally] += 1
+		commit_tally_sum += 1
 
 		## print out what we've done so far
-		STDERR.print author + " from " + author_org + ", "
-	end
-	exit()
-	oarr = client.organizations(gazer.login)
-	oarr.each do |o|
-		og = client.organization(o.login)
-		if og.name != nil then
-			commit_tally[og.name.strip] ||= 0
-			commit_tally[og.name.strip] += 1
-			STDERR.print og.name + ", "
-		elsif og.login != nil
-			commit_tally[og.login.strip] ||= 0
-			commit_tally[og.login.strip] += 1
-			STDERR.print og.login + ", "
+		#STDERR.print author + " from " + author_org + ", "
+
+		## then tally from an org perspective
+		if commit_tally[author_org] == nil then
+			commit_tally[author_org] ||= 0
+			commit_tally[author_org] += 1
+			#STDERR.print "First time seeing " + author_org + ".\n"
+		else
+			commit_tally[author_org] += 1
+			#STDERR.print "giving " + author_org + " commits totalling " + commit_tally[author_org].to_s + ".\n"
 		end
 	end
 end
 
-commit_tally.each do |k,v|
-	puts k + "," + v.to_s
-end
+######################
+## Report print out ##
+######################
 
-puts "Total commits:, " + star_sum.to_s
+## Setting up top row of a spreadsheet
+puts "user,commits by user,their org,org,commits by org"
+
+committers.each do |key, hash|
+	## user and their total and org
+	puts hash[:id] + ", " + hash[:tally].to_s + ", " + hash[:org]
+end
+commit_tally.each do |org|
+	puts org[0] + ", " + org[1].to_s
+end
+puts "Total commits:, " + commit_tally_sum.to_s
