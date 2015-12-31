@@ -85,13 +85,19 @@ end
 ######################
 
 ## Setting up top row of a spreadsheet
-puts "user,commits by user,their org,org,commits by org"
+print "user,commits by user,their org,org,commits by org"
+puts ", Total commits:, " + commit_tally_sum.to_s
 
 committers.each do |key, hash|
+	count = 0
 	## user and their total and org
-	puts hash[:id] + ", " + hash[:tally].to_s + ", " + hash[:org]
+	print hash[:id] + ", " + hash[:tally].to_s + ", " + hash[:org]
+
+	## while count is less than the size of commit_tally, print next to line ^
+	if commit_tally[count] then
+		puts ", " + org[0] + ", " + org[1].to_s
+	else
+		puts ""
+	end
+	count += 1
 end
-commit_tally.each do |org|
-	puts org[0] + ", " + org[1].to_s
-end
-puts "Total commits:, " + commit_tally_sum.to_s
