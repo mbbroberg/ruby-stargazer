@@ -23,6 +23,7 @@ sg.each do | gazer |
 	oarr = client.organizations(gazer.login)
 	oarr.each do |o|
 		og = client.organization(o.login)
+		star_sum += 1
 		if og.name != nil then
 			orgs[og.name.strip] ||= 0
 			orgs[og.name.strip] += 1
