@@ -20,7 +20,7 @@ commit_tally_sum = 0
 
 Octokit.auto_paginate = true ## Need this to get over 30 responses
 client = Octokit::Client.new \
-	:login		=> "mjbrender",
+	:login		=> USR,
 	:password	=> PW
 
 commits = client.commits("intelsdi-x/snap")

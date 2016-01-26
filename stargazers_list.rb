@@ -10,7 +10,7 @@ orgs = {}
 star_sum = 0
 
 Octokit.auto_paginate = true ## Need this to get over 30 responses
-client = Octokit::Client.new(:login=>"mjbrender", :password=>PW)
+client = Octokit::Client.new(:login=>USR, :password=>PW)
 
 sg = client.stargazers("intelsdi-x/snap")
 sg.each do | gazer |
